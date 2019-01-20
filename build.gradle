@@ -9,6 +9,7 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "gradle.plugin.com.github.alexeylisyutenko:windows-service-plugin:1.1.0"
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.1'
     }
 //    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
@@ -20,6 +21,7 @@ apply plugin: "com.github.alexeylisyutenko.windows-service-plugin"
 apply plugin: 'kotlin'
 apply plugin: 'application'
 apply plugin: 'java'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 group 'top.kiswich'
 version '1.0-SNAPSHOT'
@@ -32,27 +34,47 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     // https://mvnrepository.com/artifact/com.google.code.gson/gson
-    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
     // https://mvnrepository.com/artifact/commons-io/commons-io
     compile group: 'commons-io', name: 'commons-io', version: '2.4'
+    compile 'com.google.guava:guava:27.0.1-jre'
+    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.0'
+    compile 'com.github.vatbub:mslinks:1.0.5'
+    compile localGroovy()
+    testCompile "junit:junit:4.12"
 }
 
 compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "1.6"
 }
 compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "1.6"
 }
 
 windowsService {
-    architecture = 'amd64'
-    displayName = 'TestService'
+    architecture = com.github.alexeylisyutenko.windowsserviceplugin.Architecture.AMD64
+    displayName = 'tempArchiveService'
     description = 'tempArchive Windows Service'
-    startClass = 'MyService'
+    startClass = 'top.kiswich.temparchive.MainController'
     startMethod = 'main'
     startParams = 'start'
-    stopClass = 'MyService'
+    stopClass = 'top.kiswich.temparchive.MainController'
     stopMethod = 'main'
     stopParams = 'stop'
-    startup = 'auto'
+    startup = startup.AUTO
 }
+
+jar {
+    manifest {
+        attributes "Main-Class": "top.kiswich.temparchive.MainController"
+    }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+//shadowJar {
+//    manifest {
+//        attributes "Main-Class": "top.kiswich.temparchive.MainController"
+//    }
+//}

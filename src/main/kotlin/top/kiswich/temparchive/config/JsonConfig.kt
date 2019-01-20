@@ -1,14 +1,13 @@
-package top.kiswich.temparchive
+package top.kiswich.temparchive.config
 
 import com.google.gson.Gson
 import org.apache.commons.io.IOUtils
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import kotlin.reflect.KClass
 
 
-class Config {
+class JsonConfig  {
     val configPath: String = "${System.getProperty("user.home")}${File.separator}tempArchive"
     val configFileName: String = "config.json"
     var tempDirs: Array<String> = arrayOf()
@@ -30,7 +29,6 @@ class Config {
         }
 
         this.configBean = gson.fromJson<ConfigBean>(IOUtils.toString(FileInputStream(file)), ConfigBean::class.java)
-
     }
 
     public fun reload() {
