@@ -39,6 +39,22 @@ object CoroutineUtils {
         }
     }
 
+    suspend fun waitFileSmooth(file: File) {
+        var length = file.length()
+        var count = 0
+
+        while (count <= 3) {
+            val newLength = file.length()
+            if (newLength == length){
+                count++
+            }else{
+                count = 0
+                length = newLength
+            }
+            delay(4000)
+        }
+    }
+
     /**
      * 等待文件写锁释放
      */
@@ -55,7 +71,7 @@ object CoroutineUtils {
         }
     }
 
-    suspend fun waitReleaseRecursive(file: File) {
+    private suspend fun waitReleaseRecursive(file: File) {
         RandomAccessFile(file, "rw").use {
             it.channel.use { channel ->
                 var tryLock = channel.tryLock()

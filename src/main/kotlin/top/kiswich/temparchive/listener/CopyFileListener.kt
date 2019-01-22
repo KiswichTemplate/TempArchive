@@ -30,9 +30,14 @@ class CopyFileListener(val basePath: String, val archivePath: String) : FileAlte
         val launch = GlobalScope.launch {
             //TODO 大文件写入时
 //            delay(10000)
+            //等待文件大小稳定
+            CoroutineUtils.waitFileSmooth(file)
+
             //等待文件写锁释放
             CoroutineUtils.waitRelease(file)
 
+            //稳一波
+            delay(4000)
             CoroutineUtils.slowCopy(file.absolutePath, targetPath)
 
             //eventbus防止协程冲突
@@ -44,7 +49,11 @@ class CopyFileListener(val basePath: String, val archivePath: String) : FileAlte
             EventBusController.post(LinkDto(filePath, File(archivePath, "today.lnk").absolutePath))
             println("create link ${File(archivePath, "today.lnk").absolutePath}")
         }
+    }
 
+    // TODO (下载文件时也用的临时文件方式存储)
+    override fun onFileChange(file: File?) {
+        super.onFileChange(file)
     }
 
     override fun onDirectoryCreate(directory: File?) {
